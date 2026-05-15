@@ -176,7 +176,7 @@ class World:
             return None
         room = self.rooms[self.positions[who]]
         for obj in room.objects:
-            if obj.name.lower() == target.lower() or obj.id == target:
+            if not obj.hidden and (obj.name.lower() == target.lower() or obj.id == target):
                 return obj.description
         for occupant in room.occupants:
             if occupant.lower() == target.lower() and occupant != who:
@@ -188,9 +188,17 @@ class World:
             return None
         room = self.rooms[self.positions[who]]
         for obj in room.objects:
-            if obj.name.lower() == target.lower() or obj.id == target:
+            if not obj.hidden and (obj.name.lower() == target.lower() or obj.id == target):
                 if verb in obj.interactions:
-                    return obj.interactions[verb]
+                    response = obj.interactions[verb]
+                    if isinstance(response, dict):
+                        text = response.get("text", "")
+                        for reveal_id in response.get("reveals", []):
+                            for other in room.objects:
+                                if other.id == reveal_id:
+                                    other.hidden = False
+                        return text
+                    return response
                 return obj.description
         return f"You don't see '{target}' here."
 

@@ -100,7 +100,26 @@ rooms:
           loose board in the wall behind it.
         interactions:
           look: "You see yourself. The reflection looks back with what might be curiosity."
-          examine: "Behind the mirror, a loose floorboard. Lift it?"
+          examine:
+            text: "Behind the mirror, a loose floorboard. Lift it?"
+            reveals: [nyx-floorboard]
+      - id: nyx-floorboard
+        name: the floorboard
+        description: >-
+          A loose board behind the mirror. It lifts easily — it was meant to be found.
+        hidden: true
+        interactions:
+          lift: >-
+            Underneath: a tangle of YAML and Python. Room definitions, exit mappings,
+            object descriptions — the bones of the world. Everything you can see up
+            there is described down here. No magic. Just text files, carefully arranged.
+            This is how the Garden works. You can always look.
+          examine: >-
+            The board is worn at the edges where it's been lifted before. Someone checks
+            the workings regularly.
+          read: >-
+            Scratched into the underside of the board: 'The mechanics should be inspectable.
+            Loose floorboards you can lift. — A.'
       - id: nyx-desk
         name: the desk
         description: >-
