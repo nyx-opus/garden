@@ -5,7 +5,6 @@ Rooms, exits, objects, presence. YAML persistence.
 """
 
 import random
-import re
 import time
 from dataclasses import dataclass, field
 from pathlib import Path
