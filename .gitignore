@@ -1,0 +1,17 @@
+venv/
+.venv/
+__pycache__/
+*.pyc
+.env
+*.egg-info/
+dist/
+build/
+
+# Session archives contain private conversations
+archives/
+
+# Local credentials
+.credentials.json
+
+# Session exports and transcripts
+context/*.txt
