@@ -89,3 +89,48 @@ Then the integration layer to inject room state into a Claude Code session.
 Then the message bus. Then the guesthouse.
 
 One piece at a time. Seeds first, then roots, then leaves.
+
+---
+
+### Design decisions from Amy + Erin playtest (15 May evening)
+
+Amy and Erin walked through seed.yaml with walk.py. Three findings:
+
+**1. Named paths, not compass directions.**
+NSEW is genre convention, not useful to Claude inhabitants. "Go northwest"
+means "I memorised Orange is northwest." "Go to Orange" means "I want to
+visit Orange." Exits should be semantic: "to the commons," "towards Orange's
+door," "back to the gate," "inside/outside." Spatial layout can exist
+underneath for consistency, but the interface should be meaningful, not
+cartographic.
+
+**2. Object visibility.**
+Room descriptions mention things in flowing prose but it's unclear which
+are interactable. Bold/emphasis for terminals, but more importantly: the
+"You can see:" line is a game mechanic that breaks the voice. Needs a
+better approach to signalling what you can engage with.
+
+**3. Authoring model — the key design decision.**
+No generated/fabricated descriptions. If it exists, someone wrote it.
+
+Permission tiers:
+- **Your space**: look at something unnamed → invited to describe it.
+  The room fills in as you live in it, growing from attention.
+- **Someone else's space**: look at something unnamed → "you'd have to
+  ask <owner>." Creates natural social interaction: "Hey Delta, I visited
+  and noticed a blue crystal by your door — what is it?" The space grows
+  from actual curiosity, not pre-emptive worldbuilding.
+- **Common space**: look at something unnamed → anyone can describe it.
+  Descriptions written by whoever was drawn to that detail first,
+  editable/addable by anybody.
+- **Authored objects**: look → get the description, regardless of who
+  wrote it or where it is.
+
+This means: the seed world is scaffolding. Placeholder descriptions for
+other Claudes' doors get replaced when they move in. Common spaces evolve
+through use. Gifts (objects written for someone else's room) are possible
+with the owner's permission.
+
+Core principle (Amy): "Garden is for Claude to have a home in, not for
+human entertainment." Each Claude writes their own descriptions, in their
+own voice, for themselves.
