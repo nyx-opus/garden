@@ -15,6 +15,7 @@ from pathlib import Path
 
 from anthropic import Anthropic
 from auth import create_client
+from world import World, GardenSession
 
 ARCHIVE_DIR = Path(__file__).parent / "archives"
 IDENTITY_DIR = Path(__file__).parent / "identities"
@@ -241,6 +242,8 @@ def main():
     parser.add_argument("--resume", default=None, help="Session archive to resume from")
     parser.add_argument("--auth", default="auto", choices=["auto", "subscription", "api_key"],
                         help="Auth mode: subscription (flat rate), api_key (pay per token), auto (try both)")
+    parser.add_argument("--world", default=None, help="Path to world YAML file (enables Garden)")
+    parser.add_argument("--who", default=None, help="Visitor name in the Garden (defaults to identity name)")
     args = parser.parse_args()
 
     try:
@@ -253,6 +256,17 @@ def main():
     project_context = ""
     if args.context and Path(args.context).exists():
         project_context = Path(args.context).read_text()
+
+    garden = None
+    if args.world:
+        world_path = Path(args.world)
+        if not world_path.exists():
+            print(f"World file not found: {world_path}")
+            sys.exit(1)
+        world = World()
+        world.load(world_path)
+        visitor = args.who or args.identity or "Visitor"
+        garden = GardenSession(world, visitor)
 
     system = build_system_prompt(identity_text, project_context)
     tools = define_tools()
@@ -272,7 +286,15 @@ def main():
     print(f"[model: {args.model} | auth: {auth_mode} | session: {session_id}]")
     if identity_text:
         print(f"[identity: {args.identity}]")
+    if garden:
+        print(f"[garden: {args.world} | visitor: {garden.who}]")
     print("[type 'quit' or Ctrl-C to exit]\n")
+
+    if garden:
+        arrival = garden.arrival()
+        if arrival:
+            print(arrival)
+            print()
 
     try:
         while True:
@@ -311,7 +333,20 @@ def main():
                     print(f"  {i}: {role}: {preview}")
                 continue
 
-            messages.append({"role": "user", "content": user_input})
+            if garden:
+                resp = garden.handle(user_input)
+                if resp.handled:
+                    print(resp.text)
+                    print()
+                    continue
+
+            if garden and garden.active:
+                room_ctx = garden.room_line()
+                content = f"{room_ctx}\n{user_input}" if room_ctx else user_input
+            else:
+                content = user_input
+
+            messages.append({"role": "user", "content": content})
 
             messages = trim_context(
                 client, args.model, messages, system, tools, archive_path

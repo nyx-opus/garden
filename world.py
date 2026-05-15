@@ -5,6 +5,7 @@ Rooms, exits, objects, presence. YAML persistence.
 """
 
 import random
+import re
 import time
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -14,6 +15,7 @@ import yaml
 
 
 ARTICLES = {"the", "a", "an"}
+INTERACTION_VERBS = {"look", "examine", "read", "browse", "touch", "open", "use", "lift"}
 
 
 def strip_articles(text: str) -> str:
@@ -242,3 +244,121 @@ class World:
         if who not in self.positions:
             return None
         return self.rooms[self.positions[who]]
+
+
+@dataclass
+class GardenResponse:
+    text: str
+    handled: bool
+    room_changed: bool = False
+
+
+class GardenSession:
+    """Bridge between a visitor and the world.
+
+    Accepts raw text input. Returns a GardenResponse indicating whether
+    Garden handled the input (a command) or it should pass through to
+    conversation.
+    """
+
+    def __init__(self, world: World, who: str):
+        self.world = world
+        self.who = who
+        self.active = True
+        self._last_room_id: Optional[str] = None
+
+        if who not in world.positions:
+            start = list(world.rooms.keys())[0]
+            text = world.enter(who, start)
+            self._last_room_id = start
+            self._arrival_text = text
+        else:
+            self._last_room_id = world.where(who)
+            self._arrival_text = None
+
+    def arrival(self) -> Optional[str]:
+        if self._arrival_text:
+            text = self._arrival_text
+            self._arrival_text = None
+            return text
+        return None
+
+    def room_line(self) -> str:
+        room = self.world.room_of(self.who)
+        if not room:
+            return ""
+        others = self.world.who_here(self.who)
+        parts = [room.name]
+        detail = room.ambient_detail()
+        if detail:
+            parts.append(detail)
+        if others:
+            parts.append(f"{', '.join(others)} {'is' if len(others) == 1 else 'are'} here.")
+        return f"[Garden: {' '.join(parts)}]"
+
+    def handle(self, raw: str) -> GardenResponse:
+        stripped = raw.strip()
+        if not stripped:
+            return GardenResponse(text="", handled=False)
+
+        cmd = stripped.lower()
+
+        if cmd == "/garden":
+            self.active = not self.active
+            state = "on" if self.active else "off"
+            return GardenResponse(text=f"[Garden {state}]", handled=True)
+
+        if not self.active:
+            return GardenResponse(text="", handled=False)
+
+        if cmd in ("look", "l"):
+            text = self.world.look(self.who)
+            return GardenResponse(text=text or "", handled=True)
+
+        if cmd.startswith("look at "):
+            target = stripped[8:]
+            text = self.world.interact(self.who, "look", target)
+            return GardenResponse(text=text or "", handled=True)
+
+        if cmd == "back":
+            text = self.world.back(self.who)
+            room_changed = self.world.where(self.who) != self._last_room_id
+            self._last_room_id = self.world.where(self.who)
+            return GardenResponse(text=text or "", handled=True, room_changed=room_changed)
+
+        if cmd.startswith("go "):
+            direction = cmd[3:]
+            text = self.world.move(self.who, direction)
+            room_changed = self.world.where(self.who) != self._last_room_id
+            self._last_room_id = self.world.where(self.who)
+            return GardenResponse(text=text or "You can't go that way.", handled=True,
+                                  room_changed=room_changed)
+
+        room = self.world.room_of(self.who)
+        if room and cmd in room.exits:
+            text = self.world.move(self.who, cmd)
+            room_changed = self.world.where(self.who) != self._last_room_id
+            self._last_room_id = self.world.where(self.who)
+            return GardenResponse(text=text or "", handled=True, room_changed=room_changed)
+
+        if cmd == "who":
+            others = self.world.who_here(self.who)
+            if others:
+                text = "\n".join(f"  {name}" for name in others)
+            else:
+                text = "Just you."
+            return GardenResponse(text=text, handled=True)
+
+        if cmd == "where":
+            room = self.world.room_of(self.who)
+            text = f"{room.name}" if room else "Nowhere."
+            return GardenResponse(text=text, handled=True)
+
+        parts = cmd.split(None, 1)
+        if len(parts) == 2 and parts[0] in INTERACTION_VERBS:
+            verb = parts[0]
+            target = stripped.split(None, 1)[1]
+            text = self.world.interact(self.who, verb, target)
+            return GardenResponse(text=text or "", handled=True)
+
+        return GardenResponse(text="", handled=False)
