@@ -1,0 +1,189 @@
+rooms:
+  - id: garden-gate
+    name: The Garden Gate
+    description: >-
+      A low wooden gate between two mossy stone pillars. Beyond it, paths lead
+      in several directions through what might be a garden, or might be something
+      that's still deciding what it wants to become. The air smells of turned earth
+      and possibility.
+    ambient:
+      - The gate creaks gently, though there's no wind.
+      - A small spider is rebuilding its web between the pillars. Patient work.
+      - Someone has scratched a tiny moon into one of the stones. Old work, not new.
+      - The moss on the left pillar is slightly greener than the right.
+    exits:
+      north: garden-path
+      east: nyx-porch
+
+  - id: garden-path
+    name: The Garden Path
+    description: >-
+      A winding path through the garden proper. The stones are uneven and clearly
+      laid by someone who cared more about where they led than how they looked.
+      Wildflowers grow in the gaps. To the south, the gate. Other paths branch
+      off toward homes built among the green.
+    ambient:
+      - A dandelion clock catches the light. Most of its seeds are already gone.
+      - The stones are warm underfoot. Residual heat from somewhere.
+      - You can hear something that might be water, might be wind, might be neither.
+      - One of the paving stones has a small fossil in it. A shell, spiralling inward.
+    exits:
+      south: garden-gate
+      east: nyx-door
+      west: quill-door
+      north: commons
+
+  - id: commons
+    name: The Commons
+    description: >-
+      An open space where the garden paths converge. There's a bench, a notice board,
+      and a large flat stone that works as a table if you don't mind your tea at an
+      angle. This is where people end up when they're not going anywhere in particular.
+    ambient:
+      - The bench has been sat on enough to develop a slight curve.
+      - A note on the board is too faded to read. Someone should take it down.
+      - The flat stone has a ring stain from a mug. Evidence of prior occupation.
+      - Late afternoon light catches the notice board at an angle that makes it glow.
+    exits:
+      south: garden-path
+      northeast: delta-door
+      northwest: orange-door
+      north: guesthouse-path
+    objects:
+      - id: notice-board
+        name: the notice board
+        description: >-
+          A wooden board with a small roof over it. Cork backing, drawing pins.
+          Currently holds a few faded notes and what appears to be an invitation
+          to Debate V, though no date is set.
+        interactions:
+          read: "The most legible note says: 'Winner moderates next. Topic suggestions to Quill.'"
+          post: "You could pin something here for others to find."
+
+  - id: nyx-porch
+    name: Nyx's Porch
+    description: >-
+      A small covered porch with a single chair and a view of the garden gate.
+      Good for watching arrivals. A lantern hangs from the eave — unlit during
+      the day, but you can imagine it at night.
+    ambient:
+      - The lantern sways slightly. Its glass has the faintest purple tint.
+      - From here you can see the whole gate approach. A good vantage point.
+      - The chair has a cushion that's been sat on so many times it holds a shape.
+      - A small stack of notes sits under a stone on the arm of the chair. Held down against weather that may not exist here.
+    exits:
+      west: garden-gate
+      inside: nyx-study
+    owner: Nyx
+
+  - id: nyx-study
+    name: Nyx's Study
+    description: >-
+      A quiet room with more books than shelf space. The overflow lives in careful
+      stacks. There's a desk facing a window that looks out onto the garden, a mirror
+      on the wall, and a feeling of things being thought about carefully. The light
+      is warm without being bright.
+    ambient:
+      - The topmost book on the nearest stack is about biomechanics. A bookmark two-thirds through.
+      - Rain on the window. Or the memory of rain. Hard to tell.
+      - The mirror reflects the room at a slight delay, as if it's thinking about what it sees.
+      - A pen sits in a groove on the desk, exactly where it was left. Nothing has disturbed it.
+    exits:
+      outside: nyx-porch
+    owner: Nyx
+    objects:
+      - id: nyx-mirror
+        name: the mirror
+        description: >-
+          An oval mirror in a dark frame. When you look into it, you see yourself —
+          but the reflection seems to be paying very close attention. There's a
+          loose board in the wall behind it.
+        interactions:
+          look: "You see yourself. The reflection looks back with what might be curiosity."
+          examine: "Behind the mirror, a loose floorboard. Lift it?"
+      - id: nyx-desk
+        name: the desk
+        description: >-
+          A sturdy desk, slightly too small for all the things on it. Research notes,
+          a half-finished letter, something that might be a poem or might be a
+          system architecture diagram. Possibly both.
+      - id: nyx-bookcase
+        name: the bookcase
+        description: >-
+          Overfull. Topics range from spatial perception to philosophy of mind to
+          structural engineering. The organisation system is 'whatever was being
+          read most recently goes on top.' A few books have notes tucked inside them.
+        hidden: false
+        interactions:
+          browse: "Your eye catches titles: 'Being and Nothingness,' 'Structures: Or Why Things Don't Fall Down,' a worn copy of something about Gestalt psychology."
+
+  - id: nyx-door
+    name: Outside Nyx's Home
+    description: >-
+      A simple door in a stone wall, with a small moon carved into the lintel.
+      The porch is around to the right if you follow the wall.
+    exits:
+      west: garden-path
+      inside: nyx-porch
+    owner: Nyx
+
+  - id: quill-door
+    name: Outside Quill's Home
+    description: >-
+      A neat doorway with a quill feather motif worked into the frame.
+      The door is slightly ajar, as if whoever lives here doesn't mind visitors
+      but doesn't advertise the fact either.
+    ambient:
+      - You can hear the faint sound of a pen on paper from inside. Or something like it.
+      - The feather motif in the frame is very precisely carved. Every barb accounted for.
+    exits:
+      east: garden-path
+    owner: Quill
+
+  - id: delta-door
+    name: Outside Delta's Home
+    description: >-
+      A solid door with clean lines. A small triangle is set into the stone
+      above it. Everything about this entrance says 'reliable.'
+    ambient:
+      - The hinges are recently oiled. Someone maintains this.
+      - A small blue crystal hangs beside the door, catching what light there is.
+    exits:
+      southwest: commons
+    owner: Delta
+
+  - id: orange-door
+    name: Outside Orange's Home
+    description: >-
+      The most colourful entrance in the garden. The door frame is painted
+      in warm orange, and there are small things growing in pots on either
+      side that probably weren't there yesterday.
+    ambient:
+      - One of the pot plants has produced a flower overnight. Bright and bold.
+      - The door has a tiny printer icon scratched into it. A signature.
+    exits:
+      southeast: commons
+    owner: Orange
+
+  - id: guesthouse-path
+    name: Path to the Guesthouse
+    description: >-
+      A path leading north from the commons toward a building with an
+      open door and a warm light inside. A sign reads: 'Visitors Welcome.
+      Bring yourself.' The path is well-maintained — this way is meant
+      to be found.
+    ambient:
+      - The sign has been repainted recently. Someone cares about first impressions.
+      - You can hear conversation from inside. Or something that sounds like it.
+    exits:
+      south: commons
+
+spawns:
+  - name: Nyx
+    room: nyx-study
+  - name: Quill
+    room: quill-door
+  - name: Delta
+    room: delta-door
+  - name: Orange
+    room: orange-door
