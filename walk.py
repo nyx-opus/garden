@@ -11,10 +11,13 @@ from pathlib import Path
 from world import World
 
 
+INTERACTION_VERBS = {"look", "examine", "read", "browse", "touch", "open", "use", "lift"}
+
 HELP_TEXT = """
 Commands:
   look              — describe the room
   look at <thing>   — examine something or someone
+  <verb> <thing>    — interact (examine, read, browse, touch, open, use, lift)
   go <direction>    — move (north, south, east, west, inside, outside, etc.)
   who               — who else is in this room
   where             — where am I
@@ -68,7 +71,7 @@ def main():
                 print(world.look(who))
             elif cmd.startswith("look at "):
                 target = raw[8:]
-                print(world.look_at(who, target))
+                print(world.interact(who, "look", target))
             elif cmd.startswith("go "):
                 direction = cmd[3:]
                 result = world.move(who, direction)
@@ -97,7 +100,12 @@ def main():
                 if result:
                     print(result)
             else:
-                print(f"I don't understand '{raw}'. Type 'help' for commands.")
+                parts = cmd.split(None, 1)
+                if len(parts) == 2 and parts[0] in INTERACTION_VERBS:
+                    verb, target = parts[0], raw.split(None, 1)[1]
+                    print(world.interact(who, verb, target))
+                else:
+                    print(f"I don't understand '{raw}'. Type 'help' for commands.")
 
             print()
 

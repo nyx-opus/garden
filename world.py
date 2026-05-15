@@ -183,6 +183,17 @@ class World:
                 return f"{occupant} is here."
         return f"You don't see '{target}' here."
 
+    def interact(self, who: str, verb: str, target: str) -> Optional[str]:
+        if who not in self.positions:
+            return None
+        room = self.rooms[self.positions[who]]
+        for obj in room.objects:
+            if obj.name.lower() == target.lower() or obj.id == target:
+                if verb in obj.interactions:
+                    return obj.interactions[verb]
+                return obj.description
+        return f"You don't see '{target}' here."
+
     def who_here(self, who: str) -> list[str]:
         if who not in self.positions:
             return []
