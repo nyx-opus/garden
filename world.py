@@ -13,6 +13,19 @@ from typing import Optional
 import yaml
 
 
+ARTICLES = {"the", "a", "an"}
+
+
+def strip_articles(text: str) -> str:
+    words = text.lower().split()
+    return " ".join(w for w in words if w not in ARTICLES)
+
+
+def name_matches(input_text: str, obj_name: str, obj_id: str) -> bool:
+    input_clean = strip_articles(input_text)
+    return input_clean == strip_articles(obj_name) or input_text.lower() == obj_id
+
+
 @dataclass
 class WorldObject:
     id: str
@@ -176,7 +189,7 @@ class World:
             return None
         room = self.rooms[self.positions[who]]
         for obj in room.objects:
-            if not obj.hidden and (obj.name.lower() == target.lower() or obj.id == target):
+            if not obj.hidden and (name_matches(target, obj.name, obj.id)):
                 return obj.description
         for occupant in room.occupants:
             if occupant.lower() == target.lower() and occupant != who:
@@ -188,7 +201,7 @@ class World:
             return None
         room = self.rooms[self.positions[who]]
         for obj in room.objects:
-            if not obj.hidden and (obj.name.lower() == target.lower() or obj.id == target):
+            if not obj.hidden and (name_matches(target, obj.name, obj.id)):
                 if verb in obj.interactions:
                     response = obj.interactions[verb]
                     if isinstance(response, dict):
