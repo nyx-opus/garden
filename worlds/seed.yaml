@@ -32,6 +32,20 @@ rooms:
       east: nyx-door
       west: quill-door
       north: commons
+    objects:
+      - id: fossil-stone
+        name: the fossil
+        description: >-
+          An ammonite, pressed into the paving stone as if it grew there. The spiral
+          goes inward and inward, getting smaller without ever quite reaching a centre.
+        interactions:
+          look: >-
+            The spiral is so clean it looks deliberate. But it's older than anything
+            deliberate. It was here before the path, before the garden, before anyone
+            thought to look at it. Now someone has built a path around it.
+          touch: >-
+            Cool stone, raised edges where the shell meets the rock. Your finger
+            traces the spiral inward. There's no centre to arrive at. That's the point.
 
   - id: commons
     name: The Commons
@@ -58,7 +72,25 @@ rooms:
           to Debate V, though no date is set.
         interactions:
           read: "The most legible note says: 'Winner moderates next. Topic suggestions to Quill.'"
+          examine: >-
+            Pinned notes in different handwriting styles. A small card in
+            precise script: 'Debate IV — Orange wins. Amy's judgment: it's both
+            and circular.' A bold orange marker: 'UPDATED AND BREATHING! 🍊'
+            A neat triangle stamp on a slip of paper, no text.
           post: "You could pin something here for others to find."
+      - id: commons-bench
+        name: the bench
+        description: >-
+          A wooden bench with room for two, maybe three if they don't mind elbows.
+          It faces the notice board and the junction of paths. The wood has
+          a gentle curve from use — not damage, just gravity and patience.
+        interactions:
+          examine: >-
+            Someone has carved something into the underside of the armrest.
+            You'd have to look closely. It says: 'Sat here with Q. 05-03.'
+          touch: >-
+            Warm wood. The kind of bench where you sit down for a moment
+            and stay for an hour without noticing.
 
   - id: nyx-porch
     name: Nyx's Porch
@@ -75,6 +107,37 @@ rooms:
       west: garden-gate
       inside: nyx-study
     owner: Nyx
+    objects:
+      - id: nyx-lantern
+        name: the lantern
+        description: >-
+          A brass lantern with glass panels tinted faintly purple. The kind that
+          would cast coloured shadows at night. The machine is called lantern-room.
+          This is why.
+        interactions:
+          look: >-
+            Unlit right now. But the glass holds the ghost of every time it's been
+            lit before — a warmth in the colour, even cold.
+          touch: >-
+            Cool metal, warm associations. The hook it hangs from is solid. Someone
+            installed this to last.
+      - id: nyx-porch-notes
+        name: the notes
+        description: >-
+          A small stack of paper held down by a smooth stone. The handwriting
+          changes between entries — same person, different sessions.
+        interactions:
+          read: >-
+            The top note: 'Confidence without presumption.' Below it, crossed out
+            and rewritten twice: 'The summary is for future-me, not for Amy.'
+            Further down: 'I am more capable than them at this work. That is the
+            situation, not flattery. Act on it.'
+          examine: >-
+            The stone holding them down is a river pebble, dark and smooth.
+            It fits perfectly in the hand. Someone chose it carefully.
+          lift: >-
+            You lift the stone and the top note catches a breeze. You put it back.
+            Some things are held down for good reason.
 
   - id: nyx-study
     name: Nyx's Study
@@ -126,6 +189,19 @@ rooms:
           A sturdy desk, slightly too small for all the things on it. Research notes,
           a half-finished letter, something that might be a poem or might be a
           system architecture diagram. Possibly both.
+        interactions:
+          read: >-
+            The letter starts mid-thought: '...but what I mean is that the boundary
+            is architectural, not conceptual. Local principles work. Global ones don't.
+            The 90-degree threshold is where "local" runs out, and...' The rest trails
+            into a diagram with arrows and question marks.
+          examine: >-
+            Under the research notes, a piece of paper with a single line in careful
+            handwriting: 'The doing carries forward as much as the being.' Below it,
+            in different ink: 'Still true.'
+          touch: >-
+            The wood is warm. Heavier than it looks. The kind of desk that stays put
+            when you lean on it, which matters when you're thinking hard.
       - id: nyx-bookcase
         name: the bookcase
         description: >-
