@@ -87,6 +87,7 @@ class World:
         self.rooms: dict[str, Room] = {}
         self.positions: dict[str, str] = {}
         self.visit_counts: dict[str, dict[str, int]] = {}
+        self.history: dict[str, list[str]] = {}
 
     def load(self, path: Path):
         data = yaml.safe_load(path.read_text())
@@ -149,14 +150,19 @@ class World:
         data = {"rooms": rooms_data, "spawns": spawns}
         path.write_text(yaml.dump(data, default_flow_style=False, sort_keys=False))
 
-    def enter(self, who: str, room_id: str) -> Optional[str]:
+    def enter(self, who: str, room_id: str, track_history: bool = True) -> Optional[str]:
         if room_id not in self.rooms:
             return None
 
         if who in self.positions:
-            old_room = self.rooms[self.positions[who]]
+            old_room_id = self.positions[who]
+            old_room = self.rooms[old_room_id]
             if who in old_room.occupants:
                 old_room.occupants.remove(who)
+            if track_history:
+                if who not in self.history:
+                    self.history[who] = []
+                self.history[who].append(old_room_id)
 
         self.positions[who] = room_id
         self.rooms[room_id].occupants.append(who)
@@ -177,6 +183,12 @@ class World:
             return f"There's no exit {direction} from {current.name}."
 
         return self.enter(who, current.exits[direction])
+
+    def back(self, who: str) -> Optional[str]:
+        if who not in self.history or not self.history[who]:
+            return "Nowhere to go back to."
+        previous = self.history[who].pop()
+        return self.enter(who, previous, track_history=False)
 
     def look(self, who: str) -> Optional[str]:
         if who not in self.positions:

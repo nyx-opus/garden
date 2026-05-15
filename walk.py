@@ -18,7 +18,8 @@ Commands:
   look              — describe the room
   look at <thing>   — examine something or someone
   <verb> <thing>    — interact (examine, read, browse, touch, open, use, lift)
-  go <direction>    — move (north, south, east, west, inside, outside, etc.)
+  go <direction>    — move (inside, outside, or named path)
+  back              — retrace your last step (always works, even without an exit)
   who               — who else is in this room
   where             — where am I
   rooms             — list all rooms in the world
@@ -72,6 +73,8 @@ def main():
             elif cmd.startswith("look at "):
                 target = raw[8:]
                 print(world.interact(who, "look", target))
+            elif cmd == "back":
+                print(world.back(who))
             elif cmd.startswith("go "):
                 direction = cmd[3:]
                 result = world.move(who, direction)
