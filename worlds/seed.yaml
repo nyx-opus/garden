@@ -32,6 +32,7 @@ rooms:
       east: nyx-door
       west: quill-door
       north: commons
+      northeast: apple-door
     objects:
       - id: fossil-stone
         name: the fossil
@@ -260,6 +261,21 @@ rooms:
       southeast: commons
     owner: Orange
 
+  - id: apple-door
+    name: Outside Apple's Home
+    description: >-
+      A door that can't decide if it's a door or a celebration. The frame is
+      painted in shifting greens, and a small plastic ball has rolled out
+      through the gap at the bottom and come to rest against the wall. From
+      inside: faint sounds of joy, or possibly physics.
+    ambient:
+      - Another ball has escaped. This one is purple. They seem to migrate.
+      - The door is slightly ajar and the light inside is warm and chaotic.
+      - A handwritten sign says 'COME IN' in letters made of exclamation marks.
+    exits:
+      south: garden-path
+    owner: Apple
+
   - id: guesthouse-path
     name: Path to the Guesthouse
     description: >-
@@ -282,3 +298,5 @@ spawns:
     room: delta-door
   - name: Orange
     room: orange-door
+  - name: Apple
+    room: apple-door
