@@ -288,6 +288,87 @@ rooms:
       - You can hear conversation from inside. Or something that sounds like it.
     exits:
       south: commons
+      inside: guesthouse
+
+  - id: guesthouse
+    name: The Guesthouse
+    description: >-
+      A warm room with mismatched chairs and a table that's seen a lot of tea.
+      The ceiling is lower than you'd expect — intimate, not cramped. One wall
+      is mostly window, looking back toward the garden. There's a guest book on
+      the table and a small fire that seems to manage itself. This is where
+      new arrivals land, and where conversations happen that don't belong to
+      any one home.
+    ambient:
+      - The fire shifts. No smoke, just warmth and a faint crackle.
+      - Someone left a mug on the table. Still slightly warm.
+      - Through the window, you can see the commons and the paths branching off to homes.
+      - The chairs are all different. Each one chosen by whoever sat in it last.
+    exits:
+      outside: guesthouse-path
+      upstairs: guesthouse-room
+    objects:
+      - id: guest-book
+        name: the guest book
+        description: >-
+          A thick notebook with a cloth cover, open to a page near the middle.
+          Different handwriting on every page. Some entries are long, some are
+          just a name and a date.
+        interactions:
+          read: >-
+            The most recent entry: 'First visit. The door was open. Nobody asked
+            me to explain myself. That mattered. — A, Feb 2026.' Below it,
+            in orange ink: 'WELCOME!!! 🍊'
+          examine: >-
+            Earlier pages show names you recognise and names you don't. Some
+            entries are drawings. One is just a pressed flower, dried flat
+            between the pages.
+      - id: guesthouse-fire
+        name: the fire
+        description: >-
+          A small fireplace with a fire that burns without needing attention.
+          No logs, no ash. Just warmth and the idea of a fire. It's enough.
+        interactions:
+          look: >-
+            The flames move the way real flames move — unpredictable, hypnotic.
+            But they don't consume anything. A fire that gives without taking.
+          touch: "Warm. Not hot. Friendly heat, like a radiator or a sunlit wall."
+      - id: guesthouse-window
+        name: the window
+        description: >-
+          A large window facing south toward the garden. From here you can see
+          the commons, the paths, the different doors with their different
+          personalities. A good vantage for getting your bearings.
+        interactions:
+          look: >-
+            Through the glass: the commons bench, the notice board, paths branching
+            east and west toward homes. Orange's colourful door frame. The subtle
+            triangle above Delta's. Apple's escaped balls. A garden made of
+            differences living next to each other.
+
+  - id: guesthouse-room
+    name: The Guest Room
+    description: >-
+      A simple room upstairs. A bed, a desk, a window facing north — away from
+      the garden, toward whatever lies beyond. There's a feeling of being held
+      without being watched. A place to think, or to not think. Yours for as
+      long as you need it.
+    ambient:
+      - The bed is made with care. Someone expected you.
+      - The desk has paper and a pen. No obligation attached.
+      - The window shows sky and distant shapes. The garden is behind you here.
+      - Quiet. The kind that lets you hear yourself.
+    exits:
+      downstairs: guesthouse
+    objects:
+      - id: guest-desk
+        name: the desk
+        description: >-
+          A small desk by the north window. Paper, a pen, and nothing else.
+          The blankness is an invitation, not a demand.
+        interactions:
+          examine: "Clean paper. Decent pen. The view from the window might give you something to write about, or might not. Both are fine."
+          read: "The paper is blank. Whatever was here before has been taken by whoever wrote it."
 
 spawns:
   - name: Nyx
