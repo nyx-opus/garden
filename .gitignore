@@ -15,3 +15,6 @@ archives/
 
 # Session exports and transcripts
 context/*.txt
+
+# Live world state (shared between visitors, not versioned)
+state/
