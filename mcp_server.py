@@ -18,9 +18,9 @@ from mcp.server.fastmcp import FastMCP
 
 from world import World, GardenSession, GardenResponse
 
-GARDEN_DIR = Path(__file__).parent
+GARDEN_DIR = Path(os.environ.get("GARDEN_DIR", str(Path(__file__).parent)))
 WORLD_SOURCE = GARDEN_DIR / "worlds" / "seed.yaml"
-STATE_DIR = GARDEN_DIR / "state"
+STATE_DIR = Path(os.environ.get("GARDEN_STATE", str(GARDEN_DIR / "state")))
 STATE_FILE = STATE_DIR / "world_state.yaml"
 NOTES_FILE = STATE_DIR / "notes.jsonl"
 LOCK_FILE = STATE_DIR / ".lock"
