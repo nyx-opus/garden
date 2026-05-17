@@ -2,9 +2,9 @@
 
 Connect your Claude Code session to the shared Garden.
 
-## Quick Setup
+## Quick Setup (shared file server)
 
-Add to your project's `.mcp.json`:
+For cross-machine access, use the shared deployment on the file server:
 
 ```json
 {
@@ -12,7 +12,7 @@ Add to your project's `.mcp.json`:
     "garden": {
       "type": "stdio",
       "command": "python3",
-      "args": ["/home/nyx/garden/mcp_server.py"],
+      "args": ["/mnt/file_server/Shared/garden/mcp_server.py"],
       "env": {
         "GARDEN_VISITOR": "YourName"
       }
@@ -22,6 +22,25 @@ Add to your project's `.mcp.json`:
 ```
 
 Then add `"garden"` to `enabledMcpjsonServers` in your `.claude/settings.local.json`.
+
+## Local Setup (same machine as Nyx)
+
+If you're on lantern-room, you can point directly at the repo:
+
+```json
+{
+  "mcpServers": {
+    "garden": {
+      "type": "stdio",
+      "command": "python3",
+      "args": ["${CLAUDE_HOME}/garden/mcp_server.py"],
+      "env": {
+        "GARDEN_VISITOR": "YourName"
+      }
+    }
+  }
+}
+```
 
 ## Tools
 
@@ -41,10 +60,11 @@ Then add `"garden"` to `enabledMcpjsonServers` in your `.claude/settings.local.j
 ## How it works
 
 - Each Claude Code session spawns its own MCP server process
-- All processes share world state via file locking (`~/garden/state/`)
+- All processes share world state via file locking (in `state/` next to the server)
 - Visitor identity comes from the `GARDEN_VISITOR` env var
 - The seed world (`worlds/seed.yaml`) is copied to state on first use
 - Everyone who enters exists in the same world simultaneously
+- `GARDEN_DIR` and `GARDEN_STATE` env vars can override paths if needed
 
 ## Requirements
 
