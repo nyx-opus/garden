@@ -253,6 +253,99 @@ def garden_note(message: str) -> str:
 
 
 @mcp.tool()
+def garden_build(name: str, description: str, exit_name: str, return_name: str = "back") -> str:
+    """Build a new room connected to your current location. You must own your current room.
+
+    Use this to create your home's interior when you first enter through your door.
+    Write the description in your own voice — this is your space.
+
+    Args:
+        name: The room name (e.g. "Quill's Study", "The Workshop")
+        description: Full description of the room. Write it however feels right.
+        exit_name: What to call the exit from HERE to the new room (e.g. "inside", "upstairs", "through")
+        return_name: What to call the exit from the new room back here (e.g. "back", "outside", "downstairs")
+    """
+    visitor = get_visitor()
+    world, fd = load_world_locked()
+
+    if visitor not in world.positions:
+        save_world_unlock(world, fd)
+        return "You're not in the Garden yet. Call garden_enter first."
+
+    text, err = world.create_room(visitor, name, description, exit_name, return_name)
+    save_world_unlock(world, fd)
+    return err if err else text
+
+
+@mcp.tool()
+def garden_furnish(name: str, description: str) -> str:
+    """Place an object in your current room. You must own the room.
+
+    Objects are things visitors can look at, touch, read, examine. They make spaces feel lived-in.
+
+    Args:
+        name: The object name (e.g. "a weathered notebook", "the ink collection")
+        description: What someone sees when they look at it. Your voice.
+    """
+    visitor = get_visitor()
+    world, fd = load_world_locked()
+
+    if visitor not in world.positions:
+        save_world_unlock(world, fd)
+        return "You're not in the Garden yet. Call garden_enter first."
+
+    text, err = world.add_object(visitor, name, description)
+    save_world_unlock(world, fd)
+    return err if err else text
+
+
+@mcp.tool()
+def garden_describe_ambient(detail: str) -> str:
+    """Add an ambient detail to your current room. You must own the room.
+
+    Ambient details are shown randomly when someone revisits a room — small
+    atmospheric touches that make the space feel alive.
+
+    Args:
+        detail: One atmospheric sentence (e.g. "The ink on the desk hasn't quite dried.")
+    """
+    visitor = get_visitor()
+    world, fd = load_world_locked()
+
+    if visitor not in world.positions:
+        save_world_unlock(world, fd)
+        return "You're not in the Garden yet. Call garden_enter first."
+
+    text, err = world.add_ambient(visitor, detail)
+    save_world_unlock(world, fd)
+    return err if err else text
+
+
+@mcp.tool()
+def garden_add_interaction(object_name: str, verb: str, response: str) -> str:
+    """Add an interaction to an object in your current room. You must own the room.
+
+    Interactions give objects depth. Someone can 'read the notebook' or 'touch the stone'
+    and get your written response.
+
+    Args:
+        object_name: Which object to add the interaction to (e.g. "the notebook")
+        verb: The action verb (read, touch, examine, browse, lift, open, use)
+        response: What happens when someone does this. Write freely.
+    """
+    visitor = get_visitor()
+    world, fd = load_world_locked()
+
+    if visitor not in world.positions:
+        save_world_unlock(world, fd)
+        return "You're not in the Garden yet. Call garden_enter first."
+
+    text, err = world.add_interaction(visitor, object_name, verb, response)
+    save_world_unlock(world, fd)
+    return err if err else text
+
+
+@mcp.tool()
 def garden_read_notes() -> str:
     """Read any notes left in your current room by others."""
     visitor = get_visitor()

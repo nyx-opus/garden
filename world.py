@@ -244,6 +244,90 @@ class World:
             return None
         return self.rooms[self.positions[who]]
 
+    # --- Authoring ---
+
+    def _check_ownership(self, who: str) -> tuple[Optional[Room], Optional[str]]:
+        """Check visitor owns their current room. Returns (room, error_msg)."""
+        if who not in self.positions:
+            return None, "You're not in the Garden."
+        room = self.rooms[self.positions[who]]
+        if room.owner and room.owner != who:
+            return None, f"This room belongs to {room.owner}. You can only build in your own spaces."
+        if not room.owner:
+            return None, "This is a shared space. You can only build in rooms you own."
+        return room, None
+
+    def create_room(self, who: str, name: str, description: str,
+                    exit_name: str, return_name: str = "back") -> tuple[Optional[str], Optional[str]]:
+        """Create a new room connected to the current room.
+        Returns (success_text, error_text). One will be None."""
+        room, err = self._check_ownership(who)
+        if err:
+            return None, err
+
+        # Generate room ID from owner and name
+        room_id = f"{who.lower()}-{name.lower().replace(' ', '-').replace(chr(39), '')}"
+        if room_id in self.rooms:
+            return None, f"A room called '{name}' already exists."
+
+        if exit_name in room.exits:
+            return None, f"Exit '{exit_name}' already exists in {room.name}."
+
+        new_room = Room(
+            id=room_id,
+            name=name,
+            description=description,
+            exits={return_name: room.id},
+            owner=who,
+        )
+        self.rooms[room_id] = new_room
+        room.exits[exit_name] = room_id
+
+        return f"Built '{name}' ({exit_name} from {room.name}, {return_name} to return).", None
+
+    def add_object(self, who: str, name: str, description: str,
+                   interactions: Optional[dict] = None) -> tuple[Optional[str], Optional[str]]:
+        """Add an object to the current room. Must own it."""
+        room, err = self._check_ownership(who)
+        if err:
+            return None, err
+
+        obj_id = f"{room.id}-{name.lower().replace(' ', '-').replace(chr(39), '')}"
+        # Check for duplicates
+        for existing in room.objects:
+            if existing.id == obj_id:
+                return None, f"'{name}' already exists in {room.name}."
+
+        obj = WorldObject(
+            id=obj_id,
+            name=name,
+            description=description,
+            interactions=interactions or {},
+        )
+        room.objects.append(obj)
+        return f"Placed {name} in {room.name}.", None
+
+    def add_ambient(self, who: str, text: str) -> tuple[Optional[str], Optional[str]]:
+        """Add an ambient detail to the current room. Must own it."""
+        room, err = self._check_ownership(who)
+        if err:
+            return None, err
+        room.ambient.append(text)
+        return f"Added ambient detail to {room.name}.", None
+
+    def add_interaction(self, who: str, object_name: str, verb: str,
+                        response: str) -> tuple[Optional[str], Optional[str]]:
+        """Add an interaction to an object in the current room. Must own room."""
+        room, err = self._check_ownership(who)
+        if err:
+            return None, err
+
+        for obj in room.objects:
+            if name_matches(object_name, obj.name, obj.id):
+                obj.interactions[verb] = response
+                return f"Added '{verb}' interaction to {obj.name}.", None
+        return None, f"No object called '{object_name}' found in {room.name}."
+
 
 @dataclass
 class GardenResponse:
