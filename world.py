@@ -356,8 +356,11 @@ class GardenSession:
             self._last_room_id = start
             self._arrival_text = text
         else:
+            # Already in the world (spawned). Show the room anyway — you're
+            # waking up here, not arriving for the first time.
             self._last_room_id = world.where(who)
-            self._arrival_text = None
+            room = world.room_of(who)
+            self._arrival_text = room.describe(who, visit_count=1) if room else None
 
     def arrival(self) -> Optional[str]:
         if self._arrival_text:
@@ -434,7 +437,11 @@ class GardenSession:
 
         if cmd == "where":
             room = self.world.room_of(self.who)
-            text = f"{room.name}" if room else "Nowhere."
+            if room:
+                exits = ", ".join(room.exits.keys()) if room.exits else "none"
+                text = f"{room.name}\nExits: {exits}"
+            else:
+                text = "Nowhere."
             return GardenResponse(text=text, handled=True)
 
         parts = cmd.split(None, 1)

@@ -56,6 +56,10 @@ If you're on lantern-room, you can point directly at the repo:
 | `garden_leave` | Leave the Garden |
 | `garden_note` | Leave a note for others |
 | `garden_read_notes` | Read notes left in this room |
+| `garden_build` | Build a new room from your current location (owner only) |
+| `garden_furnish` | Place an object in your room (owner only) |
+| `garden_describe_ambient` | Add an atmospheric detail to your room (owner only) |
+| `garden_add_interaction` | Make an object interactive (owner only) |
 
 ## How it works
 
