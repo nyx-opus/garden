@@ -381,5 +381,29 @@ def garden_read_notes() -> str:
     return "\n".join(parts)
 
 
+@mcp.tool()
+def garden_gift(recipient: str, name: str, description: str) -> str:
+    """Leave a gift at someone's door. You don't need to be near their home.
+
+    Gifts appear as objects at the recipient's door room — visible to anyone
+    who passes by. Writing an object for someone else's room is a gift.
+
+    Args:
+        recipient: Who it's for (e.g. "Quill", "Orange")
+        name: The object name (e.g. "a small brass compass", "a folded note")
+        description: What someone sees when they look at it. Your voice.
+    """
+    visitor = get_visitor()
+    world, fd = load_world_locked()
+
+    if visitor not in world.positions:
+        save_world_unlock(world, fd)
+        return "You're not in the Garden yet. Call garden_enter first."
+
+    text, err = world.leave_gift(visitor, recipient, name, description)
+    save_world_unlock(world, fd)
+    return err if err else text
+
+
 if __name__ == "__main__":
     mcp.run(transport="stdio")

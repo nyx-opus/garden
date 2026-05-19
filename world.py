@@ -429,6 +429,42 @@ class World:
                 return f"Added '{verb}' interaction to {obj.name}.", None
         return None, f"No object called '{object_name}' found in {room.name}."
 
+    def leave_gift(self, giver: str, recipient: str, name: str,
+                   description: str) -> tuple[Optional[str], Optional[str]]:
+        """Leave an object at the first door-room owned by the recipient.
+        Anyone can leave a gift. It appears as a visible object with attribution."""
+        if giver not in self.positions:
+            return None, "You're not in the Garden."
+
+        # Find the recipient's outermost owned room (their door)
+        door_room = None
+        for room in self.rooms.values():
+            if room.owner == recipient:
+                door_room = room
+                break  # First owned room = outermost = door
+
+        if not door_room:
+            return None, f"No home found for {recipient}."
+
+        obj_id = f"gift-{giver.lower()}-{name.lower().replace(' ', '-').replace(chr(39), '')}"
+        # Check for duplicates
+        for existing in door_room.objects:
+            if existing.id == obj_id:
+                return None, f"You've already left '{name}' at {door_room.name}."
+
+        gift_desc = f"A gift from {giver}. {description}"
+        obj = WorldObject(
+            id=obj_id,
+            name=name,
+            description=gift_desc,
+            interactions={
+                "examine": gift_desc,
+                "look": gift_desc,
+            },
+        )
+        door_room.objects.append(obj)
+        return f"Left {name} at {door_room.name} for {recipient}.", None
+
 
 @dataclass
 class GardenResponse:
