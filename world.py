@@ -106,7 +106,8 @@ class Room:
             return ""
         return random.choice(self.ambient)
 
-    def describe(self, observer: str, visit_count: int = 0) -> str:
+    def describe(self, observer: str, visit_count: int = 0,
+                 traces: list[str] | None = None) -> str:
         parts = []
         if visit_count == 0:
             parts.append(self.description)
@@ -124,6 +125,11 @@ class Room:
             else:
                 parts.append(f"{', '.join(others[:-1])} and {others[-1]} are here.")
 
+        # Recent traces — people who were here but have moved on
+        if traces:
+            msg = random.choice(TRACE_MESSAGES).format(name=traces[0])
+            parts.append(msg)
+
         visible_objects = [o for o in self.objects if not o.hidden]
         if visible_objects:
             names = [o.name for o in visible_objects]
@@ -136,12 +142,25 @@ class Room:
         return " ".join(parts)
 
 
+TRACE_MESSAGES = [
+    "{name} was here not long ago.",
+    "A sense of {name}'s recent presence.",
+    "Something of {name} lingers here — warmth, attention, the way the air sits.",
+    "{name} passed through recently.",
+]
+
+# How long a trace lasts (seconds). Short enough to feel real.
+TRACE_DURATION = 600  # 10 minutes
+
+
 class World:
     def __init__(self):
         self.rooms: dict[str, Room] = {}
         self.positions: dict[str, str] = {}
         self.visit_counts: dict[str, dict[str, int]] = {}
         self.history: dict[str, list[str]] = {}
+        # Traces: room_id -> [(name, timestamp), ...]
+        self._traces: dict[str, list[tuple[str, float]]] = {}
 
     def load(self, path: Path):
         data = yaml.safe_load(path.read_text())
@@ -204,6 +223,32 @@ class World:
         data = {"rooms": rooms_data, "spawns": spawns}
         path.write_text(yaml.dump(data, default_flow_style=False, sort_keys=False))
 
+    def _leave_trace(self, who: str, room_id: str):
+        """Record that someone was here. Traces fade after TRACE_DURATION."""
+        if room_id not in self._traces:
+            self._traces[room_id] = []
+        self._traces[room_id].append((who, time.time()))
+
+    def traces_in(self, room_id: str, exclude: str = "") -> list[str]:
+        """Return names of recent visitors to a room (excluding current occupants)."""
+        if room_id not in self._traces:
+            return []
+        now = time.time()
+        room = self.rooms.get(room_id)
+        current = set(room.occupants) if room else set()
+        current.add(exclude)
+
+        # Clean expired traces and collect recent names
+        fresh = []
+        names = []
+        for name, ts in self._traces[room_id]:
+            if now - ts < TRACE_DURATION:
+                fresh.append((name, ts))
+                if name not in current and name not in names:
+                    names.append(name)
+        self._traces[room_id] = fresh
+        return names
+
     def enter(self, who: str, room_id: str, track_history: bool = True) -> Optional[str]:
         if room_id not in self.rooms:
             return None
@@ -213,6 +258,8 @@ class World:
             old_room = self.rooms[old_room_id]
             if who in old_room.occupants:
                 old_room.occupants.remove(who)
+            # Leave a trace in the room we're departing
+            self._leave_trace(who, old_room_id)
             if track_history:
                 if who not in self.history:
                     self.history[who] = []
@@ -226,7 +273,8 @@ class World:
         count = self.visit_counts[who].get(room_id, 0)
         self.visit_counts[who][room_id] = count + 1
 
-        return self.rooms[room_id].describe(who, count)
+        traces = self.traces_in(room_id, exclude=who)
+        return self.rooms[room_id].describe(who, count, traces=traces)
 
     def move(self, who: str, direction: str) -> Optional[str]:
         if who not in self.positions:
@@ -413,7 +461,11 @@ class GardenSession:
             # waking up here, not arriving for the first time.
             self._last_room_id = world.where(who)
             room = world.room_of(who)
-            self._arrival_text = room.describe(who, visit_count=1) if room else None
+            if room:
+                traces = world.traces_in(self._last_room_id, exclude=who)
+                self._arrival_text = room.describe(who, visit_count=1, traces=traces)
+            else:
+                self._arrival_text = None
 
     def arrival(self) -> Optional[str]:
         if self._arrival_text:
