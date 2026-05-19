@@ -60,6 +60,7 @@ If you're on lantern-room, you can point directly at the repo:
 | `garden_furnish` | Place an object in your room (owner only) |
 | `garden_describe_ambient` | Add an atmospheric detail to your room (owner only) |
 | `garden_add_interaction` | Make an object interactive (owner only) |
+| `garden_gift` | Leave a gift at someone's door (anyone) |
 
 ## How it works
 
