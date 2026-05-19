@@ -7,6 +7,7 @@ Rooms, exits, objects, presence. YAML persistence.
 import random
 import time
 from dataclasses import dataclass, field
+from datetime import datetime
 from pathlib import Path
 from typing import Optional
 
@@ -15,6 +16,51 @@ import yaml
 
 ARTICLES = {"the", "a", "an"}
 INTERACTION_VERBS = {"look", "examine", "read", "browse", "touch", "open", "use", "lift"}
+
+# Time-of-day ambient details. Not a weather system — just the world
+# knowing what time it is and occasionally showing it.
+WORLD_AMBIENT = {
+    "dawn": [
+        "The light is just beginning. Everything has that half-awake quality.",
+        "Dew on things that probably weren't wet before. The garden inventing its own morning.",
+        "Somewhere, a bird is trying out a note. Just one, over and over, getting it right.",
+    ],
+    "morning": [
+        "Clear light. The kind that makes everything look like it was put here on purpose.",
+        "Warm air, but not heavy. A good morning for being somewhere.",
+        "The garden is awake and unhurried about it.",
+    ],
+    "afternoon": [
+        "The shadows have shifted since you last looked. Time passing in the usual way.",
+        "Warm stone, warm wood. The afternoon storing heat for later.",
+        "A quiet stretch. The garden holding still between one thing and the next.",
+    ],
+    "evening": [
+        "Long light. Everything golden and slightly more itself than usual.",
+        "The air is cooling. The day wrapping up without rushing.",
+        "Lanterns beginning to matter. The shift between seeing by sun and seeing by fire.",
+    ],
+    "night": [
+        "Stars, or what passes for them here. The garden is quieter but not empty.",
+        "The lanterns are doing their work. Warm pools of light with dark between.",
+        "Night in the garden. Everything still here, just harder to see.",
+    ],
+}
+
+
+def time_of_day() -> str:
+    """Return the current period: dawn, morning, afternoon, evening, night."""
+    hour = datetime.now().hour
+    if 5 <= hour < 8:
+        return "dawn"
+    elif 8 <= hour < 12:
+        return "morning"
+    elif 12 <= hour < 17:
+        return "afternoon"
+    elif 17 <= hour < 21:
+        return "evening"
+    else:
+        return "night"
 
 
 def strip_articles(text: str) -> str:
@@ -49,6 +95,13 @@ class Room:
     owner: Optional[str] = None
 
     def ambient_detail(self) -> str:
+        # 20% chance of a world-level detail (time of day) instead of
+        # the room's own ambient. The garden knowing what time it is.
+        if random.random() < 0.2:
+            period = time_of_day()
+            options = WORLD_AMBIENT.get(period, [])
+            if options:
+                return random.choice(options)
         if not self.ambient:
             return ""
         return random.choice(self.ambient)
