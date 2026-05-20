@@ -1,0 +1,4 @@
+#!/bin/bash
+# Admit the visitor who's knocking at your door.
+# Usage: admit
+curl -s -X POST http://localhost:8420/admit | python3 -m json.tool 2>/dev/null || echo "No one at the door (or presence server not running)."

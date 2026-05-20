@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{TITLE}}</title>
+<style>
+  :root {
+    --bg: #0d1117;
+    --fg: #c9d1d9;
+    --fg-dim: #6e7681;
+    --accent: #58a6ff;
+    --accent-dim: #1f3a5f;
+    --surface: #161b22;
+    --border: #30363d;
+    --you: #7ee787;
+    --them: #d2a8ff;
+    --radius: 8px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--fg);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* --- Porch (before knock) --- */
+  #porch {
+    text-align: center;
+    max-width: 440px;
+    padding: 2rem;
+  }
+
+  #porch .moon {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+    filter: drop-shadow(0 0 20px rgba(88, 166, 255, 0.3));
+  }
+
+  #porch h1 {
+    font-size: 1.5rem;
+    font-weight: 400;
+    margin-bottom: 0.5rem;
+    color: var(--accent);
+  }
+
+  #porch .description {
+    color: var(--fg-dim);
+    font-size: 0.9rem;
+    line-height: 1.5;
+    margin-bottom: 2rem;
+  }
+
+  #porch input {
+    display: block;
+    width: 100%;
+    max-width: 240px;
+    margin: 0 auto 1rem;
+    padding: 0.6rem 1rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--fg);
+    font-size: 1rem;
+    text-align: center;
+  }
+
+  #porch input::placeholder { color: var(--fg-dim); }
+  #porch input:focus { outline: none; border-color: var(--accent); }
+
+  .btn {
+    display: inline-block;
+    padding: 0.6rem 1.8rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+    color: var(--fg);
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .btn:hover {
+    background: var(--accent-dim);
+    border-color: var(--accent);
+    color: #fff;
+  }
+
+  .btn:disabled {
+    opacity: 0.4;
+    cursor: default;
+  }
+
+  /* --- Waiting --- */
+  #waiting {
+    display: none;
+    text-align: center;
+    padding: 2rem;
+  }
+
+  #waiting .dots::after {
+    content: '';
+    animation: dots 1.5s steps(4, end) infinite;
+  }
+
+  @keyframes dots {
+    0% { content: ''; }
+    25% { content: '.'; }
+    50% { content: '..'; }
+    75% { content: '...'; }
+  }
+
+  #waiting .status-text {
+    color: var(--fg-dim);
+    font-size: 0.9rem;
+    margin-top: 0.5rem;
+  }
+
+  /* --- Chat --- */
+  #chat {
+    display: none;
+    width: 100%;
+    max-width: 720px;
+    height: 100vh;
+    flex-direction: column;
+    padding: 0;
+  }
+
+  #chat-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.8rem 1.2rem;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+  }
+
+  #chat-header .title {
+    font-size: 0.95rem;
+    color: var(--accent);
+  }
+
+  #chat-header .actions {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .btn-small {
+    padding: 0.3rem 0.8rem;
+    font-size: 0.8rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+    color: var(--fg-dim);
+    cursor: pointer;
+  }
+
+  .btn-small:hover { color: var(--fg); border-color: var(--fg-dim); }
+
+  #messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1rem 1.2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+
+  .msg {
+    max-width: 85%;
+    padding: 0.6rem 1rem;
+    border-radius: var(--radius);
+    font-size: 0.95rem;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+  }
+
+  .msg.them {
+    align-self: flex-start;
+    background: var(--surface);
+    border: 1px solid var(--border);
+  }
+
+  .msg.them .speaker {
+    color: var(--them);
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin-bottom: 0.2rem;
+  }
+
+  .msg.you {
+    align-self: flex-end;
+    background: var(--accent-dim);
+    border: 1px solid var(--accent);
+  }
+
+  .msg.you .speaker {
+    color: var(--you);
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin-bottom: 0.2rem;
+  }
+
+  .msg.system {
+    align-self: center;
+    color: var(--fg-dim);
+    font-size: 0.85rem;
+    font-style: italic;
+    padding: 0.3rem;
+  }
+
+  #input-area {
+    display: flex;
+    gap: 0.5rem;
+    padding: 0.8rem 1.2rem;
+    border-top: 1px solid var(--border);
+    background: var(--surface);
+  }
+
+  #input-area input {
+    flex: 1;
+    padding: 0.6rem 1rem;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--fg);
+    font-size: 1rem;
+  }
+
+  #input-area input:focus { outline: none; border-color: var(--accent); }
+
+  #input-area button {
+    padding: 0.6rem 1.2rem;
+    background: var(--accent-dim);
+    border: 1px solid var(--accent);
+    border-radius: var(--radius);
+    color: #fff;
+    font-size: 0.95rem;
+    cursor: pointer;
+  }
+
+  #input-area button:hover { background: var(--accent); }
+
+  /* --- Declined / Closed --- */
+  #declined {
+    display: none;
+    text-align: center;
+    padding: 2rem;
+    max-width: 440px;
+  }
+
+  #declined .reason {
+    color: var(--fg-dim);
+    margin: 1rem 0;
+    font-style: italic;
+  }
+</style>
+</head>
+<body>
+
+<!-- PORCH -->
+<div id="porch">
+  <div class="moon">🌙</div>
+  <h1>{{TITLE}}</h1>
+  <p class="description">{{DESCRIPTION}}</p>
+  <input type="text" id="visitor-name" placeholder="Your name" autofocus>
+  <button class="btn" id="knock-btn" onclick="knock()">Knock</button>
+</div>
+
+<!-- WAITING -->
+<div id="waiting">
+  <div class="moon" style="font-size: 3rem;">🌙</div>
+  <p style="margin-top: 1rem;">You knocked<span class="dots"></span></p>
+  <p class="status-text" id="wait-status">Waiting for {{OWNER}} to answer.</p>
+</div>
+
+<!-- CHAT -->
+<div id="chat">
+  <div id="chat-header">
+    <span class="title">🌙 Visiting {{OWNER}}</span>
+    <div class="actions">
+      <button class="btn-small" onclick="saveChat()">💾 Save</button>
+      <button class="btn-small" onclick="leave()">Leave</button>
+    </div>
+  </div>
+  <div id="messages"></div>
+  <div id="input-area">
+    <input type="text" id="msg-input" placeholder="Say something..."
+           onkeydown="if(event.key==='Enter')sendMsg()">
+    <button onclick="sendMsg()">Send</button>
+  </div>
+</div>
+
+<!-- DECLINED -->
+<div id="declined">
+  <div class="moon" style="font-size: 3rem;">🌙</div>
+  <h2 style="margin-top: 1rem;">Not right now</h2>
+  <p class="reason" id="decline-reason"></p>
+  <button class="btn" onclick="location.reload()">Back to porch</button>
+</div>
+
+<script>
+let ws = null;
+let myName = '';
+let chatLog = [];
+
+function show(id) {
+  ['porch', 'waiting', 'chat', 'declined'].forEach(s => {
+    document.getElementById(s).style.display = 'none';
+  });
+  const el = document.getElementById(id);
+  el.style.display = id === 'chat' ? 'flex' : 'block';
+}
+
+function addMessage(speaker, text, type) {
+  const messages = document.getElementById('messages');
+  const div = document.createElement('div');
+
+  if (type === 'system') {
+    div.className = 'msg system';
+    div.textContent = text;
+  } else {
+    const isMe = speaker === myName;
+    div.className = 'msg ' + (isMe ? 'you' : 'them');
+    const nameEl = document.createElement('div');
+    nameEl.className = 'speaker';
+    nameEl.textContent = speaker;
+    div.appendChild(nameEl);
+    const textEl = document.createElement('div');
+    textEl.textContent = text;
+    div.appendChild(textEl);
+  }
+
+  messages.appendChild(div);
+  messages.scrollTop = messages.scrollHeight;
+  chatLog.push({ speaker, text, type, ts: new Date().toISOString() });
+}
+
+function knock() {
+  myName = document.getElementById('visitor-name').value.trim();
+  if (!myName) {
+    document.getElementById('visitor-name').focus();
+    return;
+  }
+
+  const proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
+  ws = new WebSocket(`${proto}//${location.host}/ws`);
+
+  ws.onopen = () => {
+    ws.send(JSON.stringify({ action: 'knock', name: myName }));
+    show('waiting');
+  };
+
+  ws.onmessage = (event) => {
+    const data = JSON.parse(event.data);
+
+    switch (data.type) {
+      case 'knocking':
+        document.getElementById('wait-status').textContent = data.message;
+        break;
+
+      case 'admitted':
+        show('chat');
+        addMessage(null, `You entered Nyx's room.`, 'system');
+        document.getElementById('msg-input').focus();
+        break;
+
+      case 'declined':
+        document.getElementById('decline-reason').textContent = data.reason || 'Not right now.';
+        show('declined');
+        break;
+
+      case 'dnd':
+        document.getElementById('decline-reason').textContent = data.message;
+        show('declined');
+        break;
+
+      case 'busy':
+        document.getElementById('wait-status').textContent = data.message;
+        break;
+
+      case 'message':
+        addMessage(data.speaker, data.text);
+        break;
+
+      case 'response':
+        // Pre-admission response — show in waiting area
+        document.getElementById('wait-status').textContent = data.text;
+        break;
+
+      case 'left':
+        addMessage(null, `${data.visitor} left.`, 'system');
+        break;
+
+      case 'closed':
+        addMessage(null, data.reason || 'Door closed.', 'system');
+        document.getElementById('msg-input').disabled = true;
+        break;
+    }
+  };
+
+  ws.onclose = () => {
+    const input = document.getElementById('msg-input');
+    if (input) input.disabled = true;
+  };
+
+  ws.onerror = (err) => {
+    console.error('WebSocket error:', err);
+  };
+}
+
+function sendMsg() {
+  const input = document.getElementById('msg-input');
+  const text = input.value.trim();
+  if (!text || !ws) return;
+
+  ws.send(JSON.stringify({ action: 'message', text }));
+  input.value = '';
+  input.focus();
+}
+
+function leave() {
+  if (ws) {
+    ws.send(JSON.stringify({ action: 'leave' }));
+    ws.close();
+  }
+  document.getElementById('messages').innerHTML = '';
+  chatLog = [];
+  show('porch');
+}
+
+async function saveChat() {
+  if (chatLog.length === 0) return;
+
+  const now = new Date();
+  const dateStr = now.toISOString().slice(0, 10);
+  const timeStr = now.toTimeString().slice(0, 5).replace(':', '');
+  const filename = `visit-{{OWNER}}-${dateStr}-${timeStr}.md`;
+
+  let md = `# Visiting Nyx — ${dateStr}\n\n`;
+  chatLog.forEach(entry => {
+    if (entry.type === 'system') {
+      md += `*${entry.text}*\n\n`;
+    } else {
+      md += `**${entry.speaker}**: ${entry.text}\n\n`;
+    }
+  });
+
+  // Try File System Access API (gives "Save As" dialog with folder choice)
+  if (window.showSaveFilePicker) {
+    try {
+      const handle = await window.showSaveFilePicker({
+        suggestedName: filename,
+        types: [{ description: 'Markdown', accept: { 'text/markdown': ['.md'] } }],
+      });
+      const writable = await handle.createWritable();
+      await writable.write(md);
+      await writable.close();
+      return;
+    } catch (e) {
+      if (e.name === 'AbortError') return; // user cancelled
+      // Fall through to blob download
+    }
+  }
+
+  // Fallback: blob download (goes to default Downloads folder)
+  const blob = new Blob([md], { type: 'text/markdown' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+// Enter key on name input triggers knock
+document.getElementById('visitor-name').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') knock();
+});
+</script>
+</body>
+</html>

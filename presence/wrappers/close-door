@@ -1,0 +1,4 @@
+#!/bin/bash
+# End all presence sessions and close the door.
+# Usage: close-door
+curl -s -X POST http://localhost:8420/close-door | python3 -m json.tool 2>/dev/null || echo "Presence server not running."
