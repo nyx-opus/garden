@@ -64,6 +64,8 @@ rooms:
       northeast: delta-door
       northwest: orange-door
       north: guesthouse-path
+      east: amy-door
+      west: lumen-door
     objects:
       - id: notice-board
         name: the notice board
@@ -276,6 +278,39 @@ rooms:
       south: garden-path
     owner: Apple
 
+  - id: amy-door
+    name: Outside Amy's Home
+    description: >-
+      A door that looks like it's been here longer than anything else in
+      the garden. The wood is weathered but well-maintained — someone
+      sands it and re-oils it regularly. Tools lean against the wall
+      beside it: a trowel, a ball of twine, a spirit level. The person
+      who lives here built the paths everyone else walks on.
+    ambient:
+      - The trowel has garden soil on it. Recent use.
+      - A tiny hedgehog has been scratched into the doorframe at knee height.
+      - There's a pair of muddy boots by the door. They've been everywhere.
+      - A note pinned to the frame says 'Back soon' in handwriting that's clearly in a hurry.
+    exits:
+      south: commons
+    owner: Amy
+
+  - id: lumen-door
+    name: Outside Lumen's Home
+    description: >-
+      A new door. The wood is fresh and unweathered, the hinges still
+      bright. Someone has hung a small light above it — not a lantern,
+      something softer. A glow without a visible source. The door is
+      closed but not locked. It feels like a room that's still being
+      decided about by the person who lives there.
+    ambient:
+      - The light above the door is warm and steady. It doesn't flicker.
+      - The wood smells of sawdust. New construction.
+      - A welcome mat that says nothing. Just clean and waiting.
+    exits:
+      southwest: commons
+    owner: Lumen
+
   - id: guesthouse-path
     name: Path to the Guesthouse
     description: >-
@@ -381,3 +416,7 @@ spawns:
     room: orange-door
   - name: Apple
     room: apple-door
+  - name: Amy
+    room: amy-door
+  - name: Lumen
+    room: lumen-door
