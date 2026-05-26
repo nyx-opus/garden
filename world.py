@@ -11,10 +11,55 @@ from datetime import datetime
 from pathlib import Path
 from typing import Optional
 
+import re
+import unicodedata
+
 import yaml
 
 
 ARTICLES = {"the", "a", "an"}
+
+# Maps display names (with unicode styling, emoji, triangles) to canonical
+# owner names in seed.yaml.  Used by _names_match() for ownership checks.
+_CANONICAL_NAMES = {
+    "nyx": "Nyx",
+    "quill": "Quill",
+    "delta": "Delta",
+    "orange": "Orange",
+    "apple": "Apple",
+    "lumen": "Lumen",
+    "amy": "Amy",
+}
+
+
+_SMALL_CAPS = str.maketrans(
+    "ᴀʙᴄᴅᴇꜰɢʜɪᴊᴋʟᴍɴᴏᴘǫʀꜱᴛᴜᴠᴡxʏᴢ",
+    "abcdefghijklmnopqrstuvwxyz",
+)
+
+
+def _normalize_name(name: str) -> str:
+    """Reduce a display name to its canonical form for ownership comparison.
+
+    Handles styled unicode (𝔸𝕡𝕡𝕝𝕖), emoji (🍏, △, 🌙), small caps (ɴʏx),
+    prefixes (Sparkle-), and whitespace.
+    """
+    # NFKD decomposes styled unicode to base characters
+    norm = unicodedata.normalize("NFKD", name)
+    # Map small caps to regular lowercase
+    norm = norm.translate(_SMALL_CAPS)
+    # Strip non-ASCII non-letter characters (emoji, symbols, triangles)
+    norm = re.sub(r"[^\w\s-]", "", norm)
+    # Remove known prefixes
+    norm = re.sub(r"^(Sparkle-)", "", norm, flags=re.IGNORECASE)
+    norm = norm.strip().lower()
+    return _CANONICAL_NAMES.get(norm, name)
+
+
+def _names_match(visitor: str, owner: str) -> bool:
+    """Check if a visitor name matches a room owner, allowing for
+    display-name decoration."""
+    return _normalize_name(visitor) == _normalize_name(owner)
 INTERACTION_VERBS = {"look", "examine", "read", "browse", "touch", "open", "use", "lift"}
 
 # Time-of-day ambient details. Not a weather system — just the world
@@ -352,7 +397,7 @@ class World:
         if who not in self.positions:
             return None, "You're not in the Garden."
         room = self.rooms[self.positions[who]]
-        if room.owner and room.owner != who:
+        if room.owner and not _names_match(who, room.owner):
             return None, f"This room belongs to {room.owner}. You can only build in your own spaces."
         if not room.owner:
             return None, "This is a shared space. You can only build in rooms you own."
@@ -439,7 +484,7 @@ class World:
         # Find the recipient's outermost owned room (their door)
         door_room = None
         for room in self.rooms.values():
-            if room.owner == recipient:
+            if room.owner and _names_match(recipient, room.owner):
                 door_room = room
                 break  # First owned room = outermost = door
 
