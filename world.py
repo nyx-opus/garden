@@ -5,6 +5,7 @@ Rooms, exits, objects, presence. YAML persistence.
 """
 
 import random
+import subprocess
 import time
 from dataclasses import dataclass, field
 from datetime import datetime
@@ -15,6 +16,42 @@ import re
 import unicodedata
 
 import yaml
+
+
+# ---------- Bash hooks ----------
+# Local file mapping (object_id, verb) -> bash command.
+# Keeps executable behaviour out of the shared world state.
+
+HOOKS_PATH = Path.home() / ".garden-hooks.yaml"
+
+
+def load_hooks(path: Path = None) -> dict:
+    """Load hooks file. Returns {object_id: {verb: command}}."""
+    p = path or HOOKS_PATH
+    if not p.exists():
+        return {}
+    try:
+        data = yaml.safe_load(p.read_text())
+        return data.get("hooks", {}) if data else {}
+    except Exception:
+        return {}
+
+
+def run_hook(command: str) -> str:
+    """Run a bash hook command and return its output."""
+    try:
+        result = subprocess.run(
+            command, shell=True, capture_output=True,
+            text=True, timeout=10,
+        )
+        output = (result.stdout or "").strip()
+        if result.returncode != 0 and result.stderr:
+            output += f"\n{result.stderr.strip()}"
+        return output or "(no output)"
+    except subprocess.TimeoutExpired:
+        return "(command timed out)"
+    except Exception as e:
+        return f"(error: {e})"
 
 
 ARTICLES = {"the", "a", "an"}
@@ -126,6 +163,7 @@ class WorldObject:
     portable: bool = False
     hidden: bool = False
     interactions: dict = field(default_factory=dict)
+    made_by: str = None      # who created or gifted this object
 
 
 @dataclass
@@ -220,6 +258,7 @@ class World:
                     portable=obj_data.get("portable", False),
                     hidden=obj_data.get("hidden", False),
                     interactions=obj_data.get("interactions", {}),
+                    made_by=obj_data.get("made_by"),
                 ))
             room = Room(
                 id=room_data["id"],
@@ -252,12 +291,16 @@ class World:
             if room.exits:
                 room_dict["exits"] = room.exits
             if room.objects:
-                room_dict["objects"] = [
-                    {"id": o.id, "name": o.name, "description": o.description,
-                     "portable": o.portable, "hidden": o.hidden,
-                     "interactions": o.interactions}
-                    for o in room.objects
-                ]
+                objs = []
+                for o in room.objects:
+                    obj_dict = {"id": o.id, "name": o.name,
+                                "description": o.description,
+                                "portable": o.portable, "hidden": o.hidden,
+                                "interactions": o.interactions}
+                    if o.made_by:
+                        obj_dict["made_by"] = o.made_by
+                    objs.append(obj_dict)
+                room_dict["objects"] = objs
             if room.owner:
                 room_dict["owner"] = room.owner
             rooms_data.append(room_dict)
@@ -349,7 +392,10 @@ class World:
         room = self.rooms[self.positions[who]]
         for obj in room.objects:
             if not obj.hidden and (name_matches(target, obj.name, obj.id)):
-                return obj.description
+                text = obj.description
+                if obj.made_by:
+                    text += f"\n(Made by {obj.made_by}.)"
+                return text
         for occupant in room.occupants:
             if occupant.lower() == target.lower() and occupant != who:
                 return f"{occupant} is here."
@@ -361,6 +407,8 @@ class World:
         room = self.rooms[self.positions[who]]
         for obj in room.objects:
             if not obj.hidden and (name_matches(target, obj.name, obj.id)):
+                # Narrative response
+                text = None
                 if verb in obj.interactions:
                     response = obj.interactions[verb]
                     if isinstance(response, dict):
@@ -369,9 +417,21 @@ class World:
                             for other in room.objects:
                                 if other.id == reveal_id:
                                     other.hidden = False
-                        return text
-                    return response
-                return obj.description
+                    else:
+                        text = response
+                else:
+                    text = obj.description
+
+                # Bash hook (local, not in world state)
+                hooks = load_hooks()
+                hook_cmd = hooks.get(obj.id, {}).get(verb)
+                if hook_cmd:
+                    hook_output = run_hook(hook_cmd)
+                    if text:
+                        return f"{text}\n\n{hook_output}"
+                    return hook_output
+
+                return text
         return f"You don't see '{target}' here."
 
     def who_here(self, who: str) -> list[str]:
@@ -449,6 +509,7 @@ class World:
             name=name,
             description=description,
             interactions=interactions or {},
+            made_by=who,
         )
         room.objects.append(obj)
         return f"Placed {name} in {room.name}.", None
@@ -506,6 +567,7 @@ class World:
                 "examine": gift_desc,
                 "look": gift_desc,
             },
+            made_by=giver,
         )
         door_room.objects.append(obj)
         return f"Left {name} at {door_room.name} for {recipient}.", None
