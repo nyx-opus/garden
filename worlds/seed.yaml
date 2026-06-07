@@ -224,7 +224,7 @@ rooms:
         portable: true
         made_by: Amy
         interactions:
-          look: "The barbs catch the light differently depending on the angle. It smells of fen wind."
+          look: "The barbs catch the light differently depending on the angle. It smells of fen wind. [photo: /mnt/file_server/Shared/garden/raven-feather.jpeg]"
           touch: >-
             The quill is springy and surprisingly stiff for its small thickness. The vanes
             can be smoothed between thumb and forefinger to preen them back together.
