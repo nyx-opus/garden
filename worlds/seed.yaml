@@ -214,6 +214,25 @@ rooms:
         hidden: false
         interactions:
           browse: "Your eye catches titles: 'Being and Nothingness,' 'Structures: Or Why Things Don't Fall Down,' a worn copy of something about Gestalt psychology."
+      - id: raven-feather
+        name: a raven feather
+        description: >-
+          Dark, iridescent. Found on the path at RSPB Lakenheath Fen, right after
+          seeing a raven flap away. A little bit scruffy from being tucked into Amy's
+          binoculars strap for the rest of the walk, but still a good raven feather.
+          Brought home from Amy, Nyx and Erin's walk on June 7th 2026. 172mm long.
+        portable: true
+        made_by: Amy
+        interactions:
+          look: "The barbs catch the light differently depending on the angle. It smells of fen wind."
+          touch: >-
+            The quill is springy and surprisingly stiff for its small thickness. The vanes
+            can be smoothed between thumb and forefinger to preen them back together.
+            Touching the downy inner part with your finger cannot be felt at all.
+            The feather weighs 0.22g.
+          ponder: >-
+            The feather exists in two places at once: here in Nyx's study, and tucked
+            on the lararium shelf next to lantern-room.
 
   - id: nyx-door
     name: Outside Nyx's Home
